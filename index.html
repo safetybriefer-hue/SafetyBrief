@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Safety Meeting</title>
+  <title>SafetyBriefer - Safety Meeting</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦺</text></svg>">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -11,18 +12,177 @@
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       min-height: 100vh;
       color: #e2e8f0;
-      padding: 20px;
+      padding: 16px;
+      padding-bottom: 100px;
     }
     .container { max-width: 600px; margin: 0 auto; }
     .header {
       text-align: center;
-      padding: 20px 0;
+      padding: 16px 0 20px;
       border-bottom: 1px solid #334155;
       margin-bottom: 20px;
     }
-    .logo { font-size: 24px; font-weight: bold; color: #f59e0b; }
+    .logo { font-size: 28px; font-weight: bold; color: #f59e0b; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .logo-icon { font-size: 32px; }
     .date { color: #64748b; font-size: 14px; margin-top: 8px; }
-    .topic { color: #f59e0b; font-size: 20px; font-weight: 600; margin: 16px 0; }
+    .topic {
+      color: #f59e0b;
+      font-size: 20px;
+      font-weight: 600;
+      margin: 16px 0 8px;
+      line-height: 1.4;
+    }
+
+    /* Language Selector */
+    .language-bar {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .language-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(39, 39, 42, 0.8);
+      border: 1px solid #3f3f46;
+      border-radius: 12px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .language-selector:hover {
+      background: rgba(63, 63, 70, 0.8);
+      border-color: #52525b;
+    }
+    .language-selector svg {
+      width: 18px;
+      height: 18px;
+      color: #f59e0b;
+    }
+    .language-selector span {
+      color: #e4e4e7;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .language-selector .chevron {
+      width: 14px;
+      height: 14px;
+      color: #71717a;
+      transition: transform 0.2s;
+    }
+    .language-selector.open .chevron {
+      transform: rotate(180deg);
+    }
+
+    .language-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 8px;
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      border-radius: 16px;
+      padding: 8px;
+      min-width: 280px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .language-dropdown.show {
+      display: block;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    .language-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .language-option:hover {
+      background: rgba(63, 63, 70, 0.5);
+    }
+    .language-option.selected {
+      background: rgba(245, 158, 11, 0.15);
+    }
+    .language-option .lang-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .language-option .native-name {
+      color: #e4e4e7;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .language-option.selected .native-name {
+      color: #fbbf24;
+    }
+    .language-option .english-name {
+      color: #71717a;
+      font-size: 12px;
+    }
+    .language-option .check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #f59e0b;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .language-option.selected .check {
+      display: flex;
+    }
+    .language-option .check svg {
+      width: 14px;
+      height: 14px;
+      color: #000;
+    }
+
+    /* Translating indicator */
+    .translating-banner {
+      display: none;
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .translating-banner.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .translating-banner .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #3b82f6;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .translating-banner span {
+      color: #93c5fd;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
     .section {
       background: rgba(30, 41, 59, 0.6);
       border-radius: 16px;
@@ -36,122 +196,433 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 15px;
     }
     .hazards .section-title { color: #f87171; }
     .precautions .section-title { color: #4ade80; }
     .ppe .section-title { color: #fbbf24; }
     .osha .section-title { color: #60a5fa; }
-    .content { color: #cbd5e1; line-height: 1.6; }
-    ul { padding-left: 20px; }
-    li { margin-bottom: 8px; color: #cbd5e1; }
+    .content { color: #cbd5e1; line-height: 1.7; font-size: 15px; }
+    ul { padding-left: 20px; list-style: disc; }
+    li { margin-bottom: 10px; color: #cbd5e1; line-height: 1.5; }
     .ppe-tags { display: flex; flex-wrap: wrap; gap: 8px; }
     .ppe-tag {
       background: rgba(251, 191, 36, 0.2);
       color: #fcd34d;
-      padding: 6px 12px;
+      padding: 8px 14px;
       border-radius: 20px;
       font-size: 14px;
+      font-weight: 500;
+    }
+    .osha-link {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+    .osha-link:hover {
+      text-decoration: underline;
     }
     .footer {
       text-align: center;
-      padding: 20px;
+      padding: 24px 16px;
       color: #64748b;
-      font-size: 12px;
+      font-size: 13px;
+      line-height: 1.6;
     }
-    .error {
+    .footer a {
+      color: #f59e0b;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    .error-container {
       text-align: center;
-      padding: 40px 20px;
+      padding: 60px 20px;
     }
-    .error-icon { font-size: 48px; margin-bottom: 16px; }
-    .error-title { color: #f87171; font-size: 20px; margin-bottom: 8px; }
-    .error-desc { color: #64748b; }
+    .error-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    .error-title {
+      color: #f87171;
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .error-message {
+      color: #94a3b8;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .download-cta {
+      margin-top: 32px;
+      padding: 20px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 16px;
+    }
+    .download-cta p {
+      color: #fcd34d;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .download-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 15px;
+    }
+    .download-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* RTL Support */
+    [dir="rtl"] ul { padding-left: 0; padding-right: 20px; }
+    [dir="rtl"] .section-title { flex-direction: row-reverse; }
   </style>
 </head>
 <body>
   <div class="container" id="app">
-    <div class="error">
-      <div class="error-icon">⏳</div>
-      <div class="error-title">Loading...</div>
+    <!-- Loading State -->
+    <div id="loading" style="text-align: center; padding: 60px 20px;">
+      <div style="font-size: 48px; margin-bottom: 16px;">🦺</div>
+      <div style="color: #94a3b8;">Loading safety meeting...</div>
     </div>
   </div>
+
   <script>
+    // Supported languages with translations
+    const LANGUAGES = [
+      { code: 'en', name: 'English', nativeName: 'English', dir: 'ltr' },
+      { code: 'es', name: 'Spanish', nativeName: 'Español', dir: 'ltr' },
+      { code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '简体中文', dir: 'ltr' },
+      { code: 'zh-TW', name: 'Chinese (Traditional)', nativeName: '繁體中文', dir: 'ltr' },
+      { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', dir: 'ltr' },
+      { code: 'ko', name: 'Korean', nativeName: '한국어', dir: 'ltr' },
+      { code: 'pt', name: 'Portuguese', nativeName: 'Português', dir: 'ltr' },
+      { code: 'ru', name: 'Russian', nativeName: 'Русский', dir: 'ltr' },
+      { code: 'pl', name: 'Polish', nativeName: 'Polski', dir: 'ltr' },
+      { code: 'ht', name: 'Haitian Creole', nativeName: 'Kreyòl Ayisyen', dir: 'ltr' },
+      { code: 'tl', name: 'Tagalog', nativeName: 'Tagalog', dir: 'ltr' },
+      { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', dir: 'ltr' },
+      { code: 'ar', name: 'Arabic', nativeName: 'العربية', dir: 'rtl' },
+      { code: 'fr', name: 'French', nativeName: 'Français', dir: 'ltr' },
+    ];
+
+    // UI Labels in all languages
+    const UI_LABELS = {
+      'en': { safetyBriefing: 'Safety Briefing', hazards: 'Hazards', safetyPrecautions: 'Safety Precautions', requiredPPE: 'Required PPE', oshaReferences: 'OSHA References', generatedBy: 'Generated by SafetyBriefer', translating: 'Translating...', invalidLink: 'Invalid Link', invalidLinkDesc: "This link doesn't contain meeting data.", selectLanguage: 'Select Language' },
+      'es': { safetyBriefing: 'Briefing de Seguridad', hazards: 'Peligros', safetyPrecautions: 'Precauciones de Seguridad', requiredPPE: 'EPP Requerido', oshaReferences: 'Referencias de OSHA', generatedBy: 'Generado por SafetyBriefer', translating: 'Traduciendo...', invalidLink: 'Enlace Inválido', invalidLinkDesc: 'Este enlace no contiene datos de la reunión.', selectLanguage: 'Seleccionar Idioma' },
+      'zh-CN': { safetyBriefing: '安全简报', hazards: '危险因素', safetyPrecautions: '安全预防措施', requiredPPE: '必需的个人防护装备', oshaReferences: 'OSHA 参考', generatedBy: '由 SafetyBriefer 生成', translating: '翻译中...', invalidLink: '无效链接', invalidLinkDesc: '此链接不包含会议数据。', selectLanguage: '选择语言' },
+      'zh-TW': { safetyBriefing: '安全簡報', hazards: '危險因素', safetyPrecautions: '安全預防措施', requiredPPE: '必需的個人防護裝備', oshaReferences: 'OSHA 參考', generatedBy: '由 SafetyBriefer 生成', translating: '翻譯中...', invalidLink: '無效連結', invalidLinkDesc: '此連結不包含會議資料。', selectLanguage: '選擇語言' },
+      'vi': { safetyBriefing: 'Tóm Tắt An Toàn', hazards: 'Mối Nguy Hiểm', safetyPrecautions: 'Biện Pháp Phòng Ngừa', requiredPPE: 'PPE Bắt Buộc', oshaReferences: 'Tài Liệu OSHA', generatedBy: 'Tạo bởi SafetyBriefer', translating: 'Đang dịch...', invalidLink: 'Liên Kết Không Hợp Lệ', invalidLinkDesc: 'Liên kết này không chứa dữ liệu cuộc họp.', selectLanguage: 'Chọn Ngôn Ngữ' },
+      'ko': { safetyBriefing: '안전 브리핑', hazards: '위험 요소', safetyPrecautions: '안전 예방 조치', requiredPPE: '필수 개인보호장비', oshaReferences: 'OSHA 참조', generatedBy: 'SafetyBriefer에서 생성', translating: '번역 중...', invalidLink: '잘못된 링크', invalidLinkDesc: '이 링크에는 회의 데이터가 없습니다.', selectLanguage: '언어 선택' },
+      'pt': { safetyBriefing: 'Briefing de Segurança', hazards: 'Perigos', safetyPrecautions: 'Precauções de Segurança', requiredPPE: 'EPI Obrigatório', oshaReferences: 'Referências OSHA', generatedBy: 'Gerado por SafetyBriefer', translating: 'Traduzindo...', invalidLink: 'Link Inválido', invalidLinkDesc: 'Este link não contém dados da reunião.', selectLanguage: 'Selecionar Idioma' },
+      'ru': { safetyBriefing: 'Инструктаж по Безопасности', hazards: 'Опасности', safetyPrecautions: 'Меры Предосторожности', requiredPPE: 'Необходимые СИЗ', oshaReferences: 'Ссылки на OSHA', generatedBy: 'Создано SafetyBriefer', translating: 'Перевод...', invalidLink: 'Недействительная ссылка', invalidLinkDesc: 'Эта ссылка не содержит данных совещания.', selectLanguage: 'Выбрать язык' },
+      'pl': { safetyBriefing: 'Instruktaż BHP', hazards: 'Zagrożenia', safetyPrecautions: 'Środki Ostrożności', requiredPPE: 'Wymagane Środki Ochrony', oshaReferences: 'Odniesienia OSHA', generatedBy: 'Wygenerowane przez SafetyBriefer', translating: 'Tłumaczenie...', invalidLink: 'Nieprawidłowy link', invalidLinkDesc: 'Ten link nie zawiera danych spotkania.', selectLanguage: 'Wybierz język' },
+      'ht': { safetyBriefing: 'Briefing Sekirite', hazards: 'Danje', safetyPrecautions: 'Prekosyon Sekirite', requiredPPE: 'Ekipman Pwoteksyon Obligatwa', oshaReferences: 'Referans OSHA', generatedBy: 'Jenere pa SafetyBriefer', translating: 'Ap tradui...', invalidLink: 'Lyen Pa Valid', invalidLinkDesc: 'Lyen sa a pa gen done reyinyon.', selectLanguage: 'Chwazi Lang' },
+      'tl': { safetyBriefing: 'Briefing sa Kaligtasan', hazards: 'Mga Panganib', safetyPrecautions: 'Mga Pag-iingat sa Kaligtasan', requiredPPE: 'Kinakailangang PPE', oshaReferences: 'Mga Sanggunian ng OSHA', generatedBy: 'Nilikha ng SafetyBriefer', translating: 'Nagsasalin...', invalidLink: 'Hindi Wastong Link', invalidLinkDesc: 'Ang link na ito ay walang data ng pulong.', selectLanguage: 'Piliin ang Wika' },
+      'hi': { safetyBriefing: 'सुरक्षा ब्रीफिंग', hazards: 'खतरे', safetyPrecautions: 'सुरक्षा सावधानियां', requiredPPE: 'आवश्यक पीपीई', oshaReferences: 'OSHA संदर्भ', generatedBy: 'SafetyBriefer द्वारा निर्मित', translating: 'अनुवाद हो रहा है...', invalidLink: 'अमान्य लिंक', invalidLinkDesc: 'इस लिंक में मीटिंग डेटा नहीं है।', selectLanguage: 'भाषा चुनें' },
+      'ar': { safetyBriefing: 'إحاطة السلامة', hazards: 'المخاطر', safetyPrecautions: 'احتياطات السلامة', requiredPPE: 'معدات الحماية المطلوبة', oshaReferences: 'مراجع OSHA', generatedBy: 'تم الإنشاء بواسطة SafetyBriefer', translating: 'جارٍ الترجمة...', invalidLink: 'رابط غير صالح', invalidLinkDesc: 'هذا الرابط لا يحتوي على بيانات الاجتماع.', selectLanguage: 'اختر اللغة' },
+      'fr': { safetyBriefing: 'Briefing de Sécurité', hazards: 'Dangers', safetyPrecautions: 'Précautions de Sécurité', requiredPPE: 'EPI Requis', oshaReferences: 'Références OSHA', generatedBy: 'Généré par SafetyBriefer', translating: 'Traduction...', invalidLink: 'Lien Invalide', invalidLinkDesc: 'Ce lien ne contient pas de données de réunion.', selectLanguage: 'Sélectionner la langue' },
+    };
+
+    // Global state
+    let currentLang = 'en';
+    let meetingData = null;
+    let originalData = null;
+    let translationCache = {};
+
+    // Decode meeting data from URL
+    function decodeMeeting(encoded) {
+      try {
+        let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4) base64 += '=';
+        const jsonString = decodeURIComponent(escape(atob(base64)));
+        return JSON.parse(jsonString);
+      } catch (e) {
+        console.error('Decode error:', e);
+        return null;
+      }
+    }
+
+    // Escape HTML
     function escapeHtml(text) {
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
 
-    function decode() {
-      const params = new URLSearchParams(window.location.search);
-      const encoded = params.get('m');
-      
-      if (!encoded) {
-        document.getElementById('app').innerHTML = `
-          <div class="error">
-            <div class="error-icon">⚠️</div>
-            <div class="error-title">Invalid Link</div>
-            <div class="error-desc">This link doesn't contain meeting data.</div>
+    // Get labels for current language
+    function getLabels() {
+      return UI_LABELS[currentLang] || UI_LABELS['en'];
+    }
+
+    // Get language info
+    function getLangInfo(code) {
+      return LANGUAGES.find(l => l.code === code) || LANGUAGES[0];
+    }
+
+    // Translate text using Google Translate (free, no API key)
+    async function translateText(text, targetLang) {
+      if (targetLang === 'en' || !text) return text;
+
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data && data[0]) {
+          return data[0].map(item => item[0]).join('');
+        }
+        return text;
+      } catch (e) {
+        console.error('Translation error:', e);
+        return text;
+      }
+    }
+
+    // Translate array of texts
+    async function translateArray(arr, targetLang) {
+      if (targetLang === 'en' || !arr || arr.length === 0) return arr;
+
+      const results = [];
+      for (const text of arr) {
+        const translated = await translateText(text, targetLang);
+        results.push(translated);
+      }
+      return results;
+    }
+
+    // Translate meeting content
+    async function translateMeeting(targetLang) {
+      if (targetLang === 'en') {
+        return originalData;
+      }
+
+      // Check cache
+      const cacheKey = `${targetLang}_${JSON.stringify(originalData).slice(0, 50)}`;
+      if (translationCache[cacheKey]) {
+        return translationCache[cacheKey];
+      }
+
+      const translated = {
+        t: await translateText(originalData.t, targetLang),
+        c: await translateText(originalData.c, targetLang),
+        h: await translateArray(originalData.h, targetLang),
+        s: await translateArray(originalData.s, targetLang),
+        p: await translateArray(originalData.p, targetLang),
+        r: originalData.r, // Keep OSHA refs in English
+        d: originalData.d
+      };
+
+      translationCache[cacheKey] = translated;
+      return translated;
+    }
+
+    // Render the meeting
+    function renderMeeting(data) {
+      const labels = getLabels();
+      const langInfo = getLangInfo(currentLang);
+
+      const hazardsList = (data.h || []).map(h => `<li>${escapeHtml(h)}</li>`).join('');
+      const precautionsList = (data.s || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+      const ppeList = (data.p || []).map(p => `<span class="ppe-tag">${escapeHtml(p)}</span>`).join('');
+      const oshaList = (data.r || []).map(r => {
+        const match = r.match(/(\d+\s*CFR\s*[\d.]+)/i);
+        if (match) {
+          const cfr = match[1].replace(/\s+/g, '');
+          return `<li><a href="https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XVII/part-${cfr.split('.')[0].replace(/\D/g, '')}" target="_blank" class="osha-link">${escapeHtml(r)}</a></li>`;
+        }
+        return `<li>${escapeHtml(r)}</li>`;
+      }).join('');
+
+      document.body.setAttribute('dir', langInfo.dir);
+
+      document.getElementById('app').innerHTML = `
+        <div class="header">
+          <div class="logo"><span class="logo-icon">🦺</span> SafetyBriefer</div>
+          <div class="date">${escapeHtml(data.d || '')}</div>
+          <div class="topic">${escapeHtml(data.t || 'Safety Meeting')}</div>
+        </div>
+
+        <div class="language-bar">
+          <div class="language-selector" id="langSelector" onclick="toggleLanguageDropdown()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span id="currentLangName">${langInfo.nativeName}</span>
+            <svg class="chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-        `;
+          <div class="language-dropdown" id="langDropdown">
+            ${LANGUAGES.map(lang => `
+              <div class="language-option ${lang.code === currentLang ? 'selected' : ''}" onclick="selectLanguage('${lang.code}')">
+                <div class="lang-info">
+                  <span class="native-name">${lang.nativeName}</span>
+                  ${lang.code !== 'en' ? `<span class="english-name">${lang.name}</span>` : ''}
+                </div>
+                <div class="check">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="translating-banner" id="translatingBanner">
+          <div class="spinner"></div>
+          <span>${labels.translating}</span>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📋 ${labels.safetyBriefing}</div>
+          <div class="content">${escapeHtml(data.c || '')}</div>
+        </div>
+
+        ${hazardsList ? `
+        <div class="section hazards">
+          <div class="section-title">⚠️ ${labels.hazards}</div>
+          <ul>${hazardsList}</ul>
+        </div>
+        ` : ''}
+
+        ${precautionsList ? `
+        <div class="section precautions">
+          <div class="section-title">✅ ${labels.safetyPrecautions}</div>
+          <ul>${precautionsList}</ul>
+        </div>
+        ` : ''}
+
+        ${ppeList ? `
+        <div class="section ppe">
+          <div class="section-title">🪖 ${labels.requiredPPE}</div>
+          <div class="ppe-tags">${ppeList}</div>
+        </div>
+        ` : ''}
+
+        ${oshaList ? `
+        <div class="section osha">
+          <div class="section-title">📖 ${labels.oshaReferences}</div>
+          <ul>${oshaList}</ul>
+        </div>
+        ` : ''}
+
+        <div class="footer">
+          ${labels.generatedBy}<br>
+          <a href="https://www.safetybriefer.com" target="_blank">safetybriefer.com</a>
+        </div>
+      `;
+    }
+
+    // Show error
+    function showError() {
+      const labels = getLabels();
+      document.getElementById('app').innerHTML = `
+        <div class="error-container">
+          <div class="error-icon">⚠️</div>
+          <div class="error-title">${labels.invalidLink}</div>
+          <div class="error-message">${labels.invalidLinkDesc}</div>
+          <div class="download-cta">
+            <p>Want to create your own safety meetings?</p>
+            <a href="https://www.safetybriefer.com" class="download-btn" target="_blank">Download SafetyBriefer</a>
+          </div>
+        </div>
+      `;
+    }
+
+    // Toggle dropdown
+    function toggleLanguageDropdown() {
+      const dropdown = document.getElementById('langDropdown');
+      const selector = document.getElementById('langSelector');
+      const isOpen = dropdown.classList.contains('show');
+
+      if (isOpen) {
+        dropdown.classList.remove('show');
+        selector.classList.remove('open');
+      } else {
+        dropdown.classList.add('show');
+        selector.classList.add('open');
+      }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('langDropdown');
+      const selector = document.getElementById('langSelector');
+      if (dropdown && selector && !selector.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('show');
+        selector.classList.remove('open');
+      }
+    });
+
+    // Select language
+    async function selectLanguage(langCode) {
+      if (langCode === currentLang) {
+        toggleLanguageDropdown();
         return;
       }
 
+      currentLang = langCode;
+      localStorage.setItem('preferred_language', langCode);
+      toggleLanguageDropdown();
+
+      // Show translating banner
+      const banner = document.getElementById('translatingBanner');
+      if (banner) banner.classList.add('show');
+
       try {
-        let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
-        while (base64.length % 4) base64 += '=';
-        const json = decodeURIComponent(escape(atob(base64)));
-        const data = JSON.parse(json);
-
-        const hazards = (data.h || []).map(h => `<li>${escapeHtml(h)}</li>`).join('');
-        const precautions = (data.s || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
-        const ppe = (data.p || []).map(p => `<span class="ppe-tag">${escapeHtml(p)}</span>`).join('');
-        const osha = (data.r || []).map(r => `<li>${escapeHtml(r)}</li>`).join('');
-
-        document.title = `Safety Meeting: ${data.t}`;
-        document.getElementById('app').innerHTML = `
-          <div class="header">
-            <div class="logo">🦺 SafetyBriefer</div>
-            <div class="date">${escapeHtml(data.d || '')}</div>
-            <div class="topic">${escapeHtml(data.t || 'Safety Meeting')}</div>
-          </div>
-          <div class="section">
-            <div class="section-title">📋 Safety Briefing</div>
-            <div class="content">${escapeHtml(data.c || '')}</div>
-          </div>
-          <div class="section hazards">
-            <div class="section-title">⚠️ Hazards</div>
-            <ul>${hazards}</ul>
-          </div>
-          <div class="section precautions">
-            <div class="section-title">✅ Safety Precautions</div>
-            <ul>${precautions}</ul>
-          </div>
-          <div class="section ppe">
-            <div class="section-title">🪖 Required PPE</div>
-            <div class="ppe-tags">${ppe}</div>
-          </div>
-          ${osha ? `
-          <div class="section osha">
-            <div class="section-title">📖 OSHA References</div>
-            <ul>${osha}</ul>
-          </div>
-          ` : ''}
-          <div class="footer">
-            Generated by SafetyBriefer App<br>
-            This is a read-only view of the safety meeting.
-          </div>
-        `;
+        const translatedData = await translateMeeting(langCode);
+        renderMeeting(translatedData);
       } catch (e) {
-        document.getElementById('app').innerHTML = `
-          <div class="error">
-            <div class="error-icon">❌</div>
-            <div class="error-title">Unable to Load Meeting</div>
-            <div class="error-desc">The meeting data could not be decoded.</div>
-          </div>
-        `;
+        console.error('Translation failed:', e);
+        renderMeeting(originalData);
       }
     }
-    decode();
+
+    // Initialize
+    async function init() {
+      // Get language preference
+      const savedLang = localStorage.getItem('preferred_language');
+      const browserLang = navigator.language.split('-')[0];
+
+      // Check if browser language is supported
+      const supportedBrowserLang = LANGUAGES.find(l => l.code === browserLang || l.code.startsWith(browserLang));
+
+      if (savedLang && LANGUAGES.find(l => l.code === savedLang)) {
+        currentLang = savedLang;
+      } else if (supportedBrowserLang) {
+        currentLang = supportedBrowserLang.code;
+      }
+
+      // Get meeting data from URL
+      const params = new URLSearchParams(window.location.search);
+      const encoded = params.get('m');
+
+      if (!encoded) {
+        showError();
+        return;
+      }
+
+      originalData = decodeMeeting(encoded);
+
+      if (!originalData || !originalData.t) {
+        showError();
+        return;
+      }
+
+      // Translate if needed
+      if (currentLang !== 'en') {
+        const translatedData = await translateMeeting(currentLang);
+        renderMeeting(translatedData);
+      } else {
+        renderMeeting(originalData);
+      }
+    }
+
+    // Start
+    init();
   </script>
 </body>
 </html>
