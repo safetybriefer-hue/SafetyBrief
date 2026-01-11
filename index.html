@@ -42,6 +42,12 @@
       align-items: center;
       gap: 8px;
     }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
     .hazards .section-title { color: #f87171; }
     .precautions .section-title { color: #4ade80; }
     .ppe .section-title { color: #fbbf24; }
@@ -65,6 +71,29 @@
       margin: 0 auto;
       display: block;
     }
+    .share-btn {
+      background: rgba(244, 114, 182, 0.2);
+      color: #f472b6;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .share-btn:hover {
+      background: rgba(244, 114, 182, 0.3);
+    }
+    .share-btn:active {
+      background: rgba(244, 114, 182, 0.4);
+    }
+    .share-btn svg {
+      width: 14px;
+      height: 14px;
+    }
     .footer {
       text-align: center;
       padding: 20px;
@@ -76,6 +105,23 @@
       padding: 40px 20px;
     }
     .error h2 { color: #f87171; margin-bottom: 10px; }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #22c55e;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -85,6 +131,7 @@
       <p>Decoding meeting data...</p>
     </div>
   </div>
+  <div class="toast" id="toast">Copied to clipboard!</div>
 
   <script>
     function escapeHtml(text) {
@@ -109,6 +156,50 @@
       }
     }
 
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    async function shareCartoon(imageUrl, topic) {
+      const shareData = {
+        title: 'Safety Cartoon',
+        text: `Safety cartoon for: ${topic}`,
+        url: imageUrl
+      };
+
+      // Try native share first (works on mobile)
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (e) {
+          if (e.name !== 'AbortError') {
+            console.log('Share failed, falling back to clipboard');
+          } else {
+            return; // User cancelled
+          }
+        }
+      }
+
+      // Fallback: copy image URL to clipboard
+      try {
+        await navigator.clipboard.writeText(imageUrl);
+        showToast('Image link copied to clipboard!');
+      } catch (e) {
+        // Final fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = imageUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showToast('Image link copied to clipboard!');
+      }
+    }
+
     function renderMeeting(data) {
       const hazardsList = (data.h || []).map(h => `<li>${escapeHtml(h)}</li>`).join('');
       const precautionsList = (data.s || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
@@ -118,7 +209,17 @@
       // Build cartoon section if image URL exists
       const cartoonSection = data.img ? `
         <div class="section cartoon">
-          <div class="section-title">🎨 Safety Cartoon</div>
+          <div class="section-header">
+            <div class="section-title">🎨 Safety Cartoon</div>
+            <button class="share-btn" onclick="shareCartoon('${escapeHtml(data.img)}', '${escapeHtml(data.t)}')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                <polyline points="16 6 12 2 8 6"/>
+                <line x1="12" y1="2" x2="12" y2="15"/>
+              </svg>
+              Share
+            </button>
+          </div>
           <img
             src="${escapeHtml(data.img)}"
             alt="Safety cartoon for ${escapeHtml(data.t)}"
